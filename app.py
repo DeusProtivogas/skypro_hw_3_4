@@ -4,12 +4,13 @@ from flask import Flask, request, jsonify
 from flask_restx import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow import Schema, fields
-from schemas import MovieSchema
+from schemas import MovieSchema, GenreSchema
 
 app = Flask(__name__)
 
 api = Api(app)
 movie_ns = api.namespace("movies")
+genre_ns = api.namespace("genres")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -146,6 +147,107 @@ class MovieView(Resource):
             return "", 404
         # with db.session.begin():
         db.session.delete(movie)
+        db.session.commit()
+        return "", 204
+
+
+
+@genre_ns.route("/")
+class GenresView(Resource):
+    def get(self):
+
+        genres_schema = GenreSchema(many=True)
+
+        genres = []
+
+        # if director_id and genre_id:
+        #     movies = Movie.query.filter_by(director_id=director_id, genre_id=genre_id).all()
+        # elif director_id:
+        #     movies = Movie.query.filter_by(director_id=director_id).all()
+        # elif genre_id:
+        #     movies = Movie.query.filter_by(genre_id=genre_id).all()
+        # else:
+        genres = Genre.query.all()
+
+        if genres:
+            return genres_schema.dump(genres), 200
+        else:
+            return "", 404
+
+    def post(self):
+        req_json = request.json
+        new_genre = Genre(**req_json)
+        with db.session.begin():
+            db.session.add(new_genre)
+        return "", 201
+
+@genre_ns.route("/<int:gid>")
+class GenreView(Resource):
+    def get(self, gid):
+        genre = Genre.query.get(gid)
+        if genre:
+            return GenreSchema().dump(genre), 200
+        else:
+            return "", 404
+
+    def put(self, gid: int):
+        genre = Genre.query.get(gid)
+        if not genre:
+            return "", 404
+        req_json = request.json
+        genre.name = req_json.get("name")
+        db.session.add(genre)
+        db.session.commit()
+
+        return "", 201
+
+    # title = db.Column(db.String(255))
+    # description = db.Column(db.String(255))
+    # trailer = db.Column(db.String(255))
+    # year = db.Column(db.Integer)
+    # rating = db.Column(db.Float)
+    # genre_id = db.Column(db.Integer, db.ForeignKey("genre.id"))
+    # genre = db.relationship("Genre")
+    # director_id = db.Column(db.Integer, db.ForeignKey("director.id"))
+    # director = db.relationship("Director")
+
+    def patch(self, gid: int):
+        genre = Genre.query.get(gid)
+        if not genre:
+            return "", 404
+        req_json = request.json
+
+        if "name" in req_json:
+            genre.name = req_json.get("name")
+        # if "title" in req_json:
+        #     movie.title = req_json.get("title")
+        # if "description" in req_json:
+        #     movie.description = req_json.get("description")
+        # if "description" in req_json:
+        #     movie.trailer = req_json.get("trailer")
+        # if "description" in req_json:
+        #     movie.year = req_json.get("year")
+        # if "description" in req_json:
+        #     movie.rating = req_json.get("rating")
+        # if "description" in req_json:
+        #     movie.genre_id = req_json.get("genre_id")
+        # if "description" in req_json:
+        #     movie.director_id = req_json.get("director_id")
+        # if "text" in req_json:
+        #     note.text = req_json.get("text")
+        # if "author" in req_json:
+        #     note.author = req_json.get("author")
+        # with db.session.begin():
+        db.session.add(genre)
+        db.session.commit()
+        return "", 204
+
+    def delete(self, gid: int):
+        genre = Genre.query.get(gid)
+        if not genre:
+            return "", 404
+        # with db.session.begin():
+        db.session.delete(genre)
         db.session.commit()
         return "", 204
 
