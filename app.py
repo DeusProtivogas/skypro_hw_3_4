@@ -303,15 +303,6 @@ class GenreView(Resource):
 
         return "", 201
 
-    # title = db.Column(db.String(255))
-    # description = db.Column(db.String(255))
-    # trailer = db.Column(db.String(255))
-    # year = db.Column(db.Integer)
-    # rating = db.Column(db.Float)
-    # genre_id = db.Column(db.Integer, db.ForeignKey("genre.id"))
-    # genre = db.relationship("Genre")
-    # director_id = db.Column(db.Integer, db.ForeignKey("director.id"))
-    # director = db.relationship("Director")
 
     def patch(self, did: int):
         director = Director.query.get(did)
@@ -321,25 +312,7 @@ class GenreView(Resource):
 
         if "name" in req_json:
             director.name = req_json.get("name")
-        # if "title" in req_json:
-        #     movie.title = req_json.get("title")
-        # if "description" in req_json:
-        #     movie.description = req_json.get("description")
-        # if "description" in req_json:
-        #     movie.trailer = req_json.get("trailer")
-        # if "description" in req_json:
-        #     movie.year = req_json.get("year")
-        # if "description" in req_json:
-        #     movie.rating = req_json.get("rating")
-        # if "description" in req_json:
-        #     movie.genre_id = req_json.get("genre_id")
-        # if "description" in req_json:
-        #     movie.director_id = req_json.get("director_id")
-        # if "text" in req_json:
-        #     note.text = req_json.get("text")
-        # if "author" in req_json:
-        #     note.author = req_json.get("author")
-        # with db.session.begin():
+
         db.session.add(director)
         db.session.commit()
         return "", 204
